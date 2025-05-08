@@ -28,6 +28,7 @@ class SocialiteController extends Controller
                     'password' => bcrypt(Str::random(24)), // random password
                 ]
             );
+            session(['user_id' => $user->id]);
 
             // Always update Google ID if it has changed
             if ($user->google_id !== $googleUser->getId()) {

@@ -6,7 +6,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles; // Add this line
 
 class User extends Authenticatable
 {
@@ -47,4 +46,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function modelHasRoles()
+    {
+        return $this->hasMany(UserHasRole::class, 'user_id', 'id');
+    }
+
 }
