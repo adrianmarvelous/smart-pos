@@ -11,6 +11,10 @@ class DashboardController extends Controller
     {
         $users = User::with('modelHasRoles.hasRole')->get();
         // dd($users);
+<<<<<<< HEAD
         return view('dashboard.index');
+=======
+        return view('dashboard.index',compact('users'));
+>>>>>>> refs/remotes/origin/main
     }
 }

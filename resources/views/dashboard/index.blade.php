@@ -142,13 +142,6 @@
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
             </div>
 
-            <!-- Sidebar Message -->
-            <div class="sidebar-card d-none d-lg-flex">
-                <img class="sidebar-card-illustration mb-2" src="img/undraw_rocket.svg" alt="...">
-                <p class="text-center mb-2"><strong>SB Admin Pro</strong> is packed with premium features, components, and more!</p>
-                <a class="btn btn-success btn-sm" href="https://startbootstrap.com/theme/sb-admin-pro">Upgrade to Pro!</a>
-            </div>
-
         </ul>
         <!-- End of Sidebar -->
 
@@ -364,7 +357,20 @@
 
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
-                    
+                    @isset($users)
+                        <div>
+                            <a class="btn btn-primary p-3 m-3" href="">
+                                <i class="fa fa-store fa-10x"></i>
+                                <br>
+                                Make Store
+                            </a>
+                            <a class="btn btn-info p-3 m-3" href="">
+                                <i class="fa fa-users fa-10x"></i>
+                                <br>
+                                Be a Crew Store
+                            </a>
+                        </div>
+                    @endisset
                 </div>
                 <!-- /.container-fluid -->
 
