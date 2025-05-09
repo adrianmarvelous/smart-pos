@@ -11,10 +11,6 @@ Route::get('/', function () {
     return view('index');
 });
 
-Route::prefix('dashboard')->group(function () {
-    Route::get('/', function () {
-        return view('dashboard.index');
-    });
+Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/', [DashboardController::class, 'index']);
-
 });
