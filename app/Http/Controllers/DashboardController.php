@@ -9,12 +9,8 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $users = User::with('modelHasRoles.hasRole')->get();
+        $user = User::with('modelHasRoles.hasRole')->where('id',session('user_id'))->first();
         // dd($users);
-<<<<<<< HEAD
-        return view('dashboard.index');
-=======
-        return view('dashboard.index',compact('users'));
->>>>>>> refs/remotes/origin/main
+        return view('dashboard.dashboard',compact('user'));
     }
 }

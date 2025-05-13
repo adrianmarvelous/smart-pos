@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class UserHasRole extends Model
 {
     protected $table = 'models_has_roles';
+    protected $fillable = [
+        'user_id',
+        'role_id',
+        'store_id',
+    ];
 
     public function hasUser()
     {
