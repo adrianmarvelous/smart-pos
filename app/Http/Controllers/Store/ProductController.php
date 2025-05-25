@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Store;
 use App\Models\Products;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
 
 use App\Rules\SafeInput;
 
@@ -26,6 +27,9 @@ class ProductController extends Controller
             'size' => ['required', 'numeric', new SafeInput],
             'unit' => ['required', 'string','max:255', new SafeInput],
             'barcode_text' => ['required', 'string','max:255', new SafeInput],
+            'harga_beli' => ['required', 'numeric','max:1000', new SafeInput],
+            'harga_jual' => ['required', 'numeric','max:1000', new SafeInput],
+            'stock' => ['required', 'numeric','max:1000', new SafeInput],
         ]);
 
         $name = $validated['name'];
@@ -34,46 +38,59 @@ class ProductController extends Controller
         $unit = $validated['unit'];
         $unit = $validated['unit'];
         $barcode_text = $validated['barcode_text'];
+        $harga_beli = $validated['harga_beli'];
+        $harga_jual = $validated['harga_jual'];
+        $stock = $validated['stock'];
         
-        if ($request->has('image_data')) {
-            $imageData = $request->input('image_data');
+        DB::beginTransaction();
+        try {
+            if ($request->has('image_data')) {
+                $imageData = $request->input('image_data');
 
-            // Remove the prefix (data:image/png;base64,)
-            [$type, $data] = explode(';', $imageData);
-            [, $data] = explode(',', $data);
+                // Remove the prefix (data:image/png;base64,)
+                [$type, $data] = explode(';', $imageData);
+                [, $data] = explode(',', $data);
 
-            // Decode the base64
-            $decodedData = base64_decode($data);
+                // Decode the base64
+                $decodedData = base64_decode($data);
 
-            // Create image resource from string
-            $sourceImage = imagecreatefromstring($decodedData);
+                // Create image resource from string
+                $sourceImage = imagecreatefromstring($decodedData);
 
-            if ($sourceImage === false) {
-                return back()->with('error', 'Invalid image data.');
+                if ($sourceImage === false) {
+                    return back()->with('error', 'Invalid image data.');
+                }
+
+                // Generate filename
+                $filename = 'product_' . time() . '.jpg';
+                $path = public_path('uploads/products/' . $filename); // Adjust the path as needed
+
+                // Save as JPG
+                imagejpeg($sourceImage, $path, 90); // 90 is quality
+
+                // Clean up memory
+                imagedestroy($sourceImage);
+
+                // Save to database if needed
+                $product = new Products();
+                $product->store_id = session('store_id');
+                $product->name = $request->name;
+                $product->varian = $request->varian;
+                $product->size = $request->size;
+                $product->unit = $request->unit;
+                $product->barcode = $request->barcode_text;
+                $product->photo = 'uploads/products/' . $filename;
+                $product->save();
+                
+
+                return redirect()->back()->with('success', 'Product saved!');
             }
+        } catch (\Exception $e) {
+            // In case of error, roll back the transaction
+            DB::rollBack();
 
-            // Generate filename
-            $filename = 'product_' . time() . '.jpg';
-            $path = public_path('uploads/products/' . $filename); // Adjust the path as needed
-
-            // Save as JPG
-            imagejpeg($sourceImage, $path, 90); // 90 is quality
-
-            // Clean up memory
-            imagedestroy($sourceImage);
-
-            // Save to database if needed
-            $product = new Products();
-            $product->store_id = session('store_id');
-            $product->name = $request->name;
-            $product->varian = $request->varian;
-            $product->size = $request->size;
-            $product->unit = $request->unit;
-            $product->barcode = $request->barcode_text;
-            $product->photo = 'uploads/products/' . $filename;
-            $product->save();
-
-            return redirect()->back()->with('success', 'Product saved!');
+            // Handle the error (e.g., log it or show a user-friendly message)
+            return redirect()->back()->with('error',   'There was an error creating the product.');
         }
 
     }
@@ -142,8 +159,12 @@ class ProductController extends Controller
             'id' => ['required', 'string', new SafeInput]
         ]);
 
-        $store = Products::find($validated['id']);
-        $store->delete();
+        $product = Products::find($validated['id']);
+        // Delete old photo if exists
+        if ($product->photo && File::exists(public_path($product->photo))) {
+            File::delete(public_path($product->photo));
+        }
+        $product->delete();
 
         return redirect()->route('products.index')->with('success', 'Product deleted successfully!');
     }

@@ -42,6 +42,12 @@
                         <input class="form-control" type="text" name="size" required>
                         <label class="mt-3">Satuan</label>
                         <input class="form-control" type="text" name="unit" required>
+                        <label class="mt-3">Harga Beli</label>
+                        <input class="form-control" type="number" name="harga_beli" required>
+                        <label class="mt-3">Harga Jual</label>
+                        <input class="form-control" type="number" name="harga_jual" required>
+                        <label class="mt-3">Stok</label>
+                        <input class="form-control" type="number" name="stock" required>
                     </div>
                     <div class="modal-footer">
                         <input type="hidden" name="image_data" id="image_data">
