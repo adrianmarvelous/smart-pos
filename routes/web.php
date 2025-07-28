@@ -16,16 +16,22 @@ Route::get('/', function () {
 })->name('home');
 
 Route::prefix('dashboard')->middleware('auth')->group(function () {
-    // Route::get('/', function () {
-    //     return view('dashboard.index');
-    // });
+
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/store', [StoreController::class, 'index'])->name('store.index');
-    Route::get('/store/create', [StoreController::class, 'create'])->name('store.create');
-    Route::get('/store/create_store', [StoreController::class, 'create_store'])->name('store.create_store');
-    Route::post('/store/update', [StoreController::class, 'update'])->name('store.update');
-    Route::post('/store/delete', [StoreController::class, 'delete'])->name('store.delete');
+    Route::get('/store/join', [StoreController::class, 'join'])->name('store.join');
+    Route::post('/store/join/apply', [StoreController::class, 'apply'])->name('store.apply');
     Route::get('/store/change_store/{id}', [StoreController::class, 'change_store'])->name('store.change_store');
+
+    Route::middleware(['auth', 'role:hhead_store'])->group(function () {
+        Route::get('/store', [StoreController::class, 'index'])->name('store.index');
+        Route::get('/store/list_crew', [StoreController::class, 'list_crew'])->name('store.list_crew');
+        Route::get('/store/create', [StoreController::class, 'create'])->name('store.create');
+        Route::get('/store/create_store', [StoreController::class, 'create_store'])->name('store.create_store');
+        Route::post('/store/update', [StoreController::class, 'update'])->name('store.update');
+        Route::post('/store/delete', [StoreController::class, 'delete'])->name('store.delete');
+        Route::get('/store/update_unique_code/{id}', [StoreController::class, 'update_unique_code'])->name('store.update_unique_code');
+        Route::post('/store/update_role', [StoreController::class, 'update_role'])->name('store.update_role');
+    });
 
     
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');

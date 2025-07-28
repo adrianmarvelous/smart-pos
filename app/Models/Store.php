@@ -13,6 +13,7 @@ class Store extends Model
         'store_name',
         'address',
         'user_id',
+        'unique_code',
     ];
 
     

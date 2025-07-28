@@ -2,11 +2,12 @@
 
 @section('content')
     <x-layout.defaultt title="Toko">
-        <div class="responsive-table">
+        <div class="table-responsive">
             <table  id="basic-datatables" class="table">
                 <thead>
                     <th>No</th>
                     <th>Nama Toko</th>
+                    <th>Kode Unik</th>
                     <th>Aksi</th>
                 </thead>
                 <tbody>
@@ -14,6 +15,13 @@
                     <tr>
                         <td>{{ $key+1 }}</td>
                         <td>{{ $item->store_name }}</td>
+                        <td>
+                            @isset($item->unique_code)
+                                {{ $item->unique_code }}
+                            @else
+                                <a class="btn btn-primary" href="{{ route('store.update_unique_code',['id' => $item->id]) }}">Create Code</a>
+                            @endisset
+                        </td>
                         <td>
                             <!-- Button trigger modal -->
                             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal{{ $key }}">
@@ -47,6 +55,32 @@
                                 </div>
                             </div>
 
+                            <!-- Button trigger modal -->
+                            <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#exampleModalupdatecode{{ $key }}">
+                            <i class="fa fa-recycle"></i>
+                            </button>
+                            <!-- Modal -->
+                            <div class="modal fade" id="exampleModalupdatecode{{ $key }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form action="{{ route('store.update_unique_code',['id' => $item->id]) }}" method="GET">
+                                            <div class="modal-header bg-warning text-white">
+                                                <h5 class="modal-title" id="exampleModalLabel">Hapus Toko</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Apakah yakin ingin mengupdate Kode Unik
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-light" data-dismiss="modal">Tutup</button>
+                                                <button type="submit" class="btn btn-warning">Update</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                             <!-- Button trigger modal -->
                             <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#exampleModaldelet{{ $key }}">
                             <i class="fa fa-trash"></i>

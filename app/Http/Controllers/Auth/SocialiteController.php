@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
 use App\Models\Store;
+use App\Models\UserHasRole;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -34,10 +35,12 @@ class SocialiteController extends Controller
             session(['name' => $googleUser->getName()]);
             session(['email' => $googleUser->getEmail()]);
 
-            $store = Store::where('user_id',$user->id)->first();
+            $store = UserHasRole::where('user_id',$user->id)->first();
+            
             if(isset($store))
             {
-                session(['store_id' => $store->id]);
+                session(['store_id' => $store->store_id]);
+                session(['role_id' => $store->role_id]);
             }
 
             // Always update Google ID if it has changed
@@ -52,7 +55,7 @@ class SocialiteController extends Controller
             return redirect()->intended('/dashboard');
 
         } catch (\Exception $e) {
-            return redirect('/login')->withErrors(['google' => 'Login failed: ' . $e->getMessage()]);
+            return redirect('/')->withErrors(['google' => 'Login failed: ' . $e->getMessage()]);
         }
     }
     

@@ -15,6 +15,8 @@ class Products extends Model
         'varian',
         'size',
         'unit',
+        'harga_beli',
+        'harga_jual',
         'photo',
         'barcode',
     ];

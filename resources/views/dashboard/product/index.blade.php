@@ -59,7 +59,7 @@
             </div>
         </div>
         </div>
-        <div class="responsive-table">
+        <div class="table-responsive">
             <table  id="basic-datatables" class="table">
                 <thead>
                     <th>No</th>

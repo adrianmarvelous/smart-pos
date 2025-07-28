@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('product_id');
             $table->string('stock');
-            $table->string('date');
+            $table->date('date');
             $table->softDeletes(); // adds a nullable 'deleted_at' timestamp
             $table->timestamps();
             

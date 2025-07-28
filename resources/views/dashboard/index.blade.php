@@ -28,13 +28,25 @@
 	<link rel="stylesheet" href="{{asset('assets/Atlantis-Lite-master')}}/assets/css/demo.css">
 </head>
 <body>
+	{{-- {{ dd(session()->all()) }} --}}
+	{{-- @php
+		use App\Models\UserHasRole;
+		
+        echo $user = Auth::user(); echo '<br>';
+        echo $store_id = session('store_id');
+        $role = UserHasRole::with('hasRole')
+                            ->where('user_id',$user->id)
+                            ->where('store_id',$store_id)
+                            ->first();
+							dd($role);
+	@endphp --}}
 	<div class="wrapper">
 		<div class="main-header">
 			<!-- Logo Header -->
 			<div class="logo-header" data-background-color="blue">
 				
-				<a href="index.html" class="logo">
-					<img src="{{asset('assets/Atlantis-Lite-master')}}/assets/img/logo.svg" alt="navbar brand" class="navbar-brand">
+				<a href="{{ route('dashboard') }}" class="logo">
+					<h1 class="text-white mt-2">Smart-Pos</h1>
 				</a>
 				<button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-toggle="collapse" data-target="collapse" aria-expanded="false" aria-label="Toggle navigation">
 					<span class="navbar-toggler-icon">
@@ -306,8 +318,8 @@
 						<div class="info">
 							<a data-toggle="collapse" href="#collapseExample" aria-expanded="true">
 								<span>
-									Hizrian
-									<span class="user-level">Administrator</span>
+									{{ session('name') }}
+									<span style="text-transform: uppercase" class="user-level">{{ $role_info->hasRole->name }}</span>
 									<span class="caret"></span>
 								</span>
 							</a>
@@ -347,9 +359,29 @@
 							<span class="sidebar-mini-icon">
 								<i class="fa fa-ellipsis-h"></i>
 							</span>
-							<h4 class="text-section">Components</h4>
+							{{-- <h4 class="text-section">Components</h4> --}}
 						</li>
-						<li class="nav-item" >
+						@foreach ($main_menu as $key => $menus)
+							<li class="nav-item" >
+								<a data-toggle="collapse" href="#base{{ $key }}">
+									<i class="fas fa-store"></i>
+									<p>{{ $menus->menu }}</p>
+									<span class="caret"></span>
+								</a>
+								<div class="collapse" id="base{{ $key }}">
+									<ul class="nav nav-collapse">
+										@foreach ($menus->menu_sub as $sub_menu)
+											<li>
+												<a href="{{ route($sub_menu->slug) }}">
+													<span class="sub-item">{{ $sub_menu->sub_menu }}</span>
+												</a>
+											</li>
+										@endforeach
+									</ul>
+								</div>
+							</li>
+						@endforeach
+						{{-- <li class="nav-item" >
 							<a data-toggle="collapse" href="#base">
 								<i class="fas fa-store"></i>
 								<p>Toko</p>
@@ -532,7 +564,7 @@
 									</li>
 								</ul>
 							</div>
-						</li>
+						</li> --}}
 					</ul>
 				</div>
 			</div>

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Store;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Store;
 use App\Models\Products;
+use App\Models\Product_Stock;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 
@@ -27,9 +29,9 @@ class ProductController extends Controller
             'size' => ['required', 'numeric', new SafeInput],
             'unit' => ['required', 'string','max:255', new SafeInput],
             'barcode_text' => ['required', 'string','max:255', new SafeInput],
-            'harga_beli' => ['required', 'numeric','max:1000', new SafeInput],
-            'harga_jual' => ['required', 'numeric','max:1000', new SafeInput],
-            'stock' => ['required', 'numeric','max:1000', new SafeInput],
+            'harga_beli' => ['required', 'numeric','digits_between:1,10', new SafeInput],
+            'harga_jual' => ['required', 'numeric','digits_between:1,10', new SafeInput],
+            'stock' => ['required', 'numeric','digits_between:1,5', new SafeInput]
         ]);
 
         $name = $validated['name'];
@@ -41,7 +43,6 @@ class ProductController extends Controller
         $harga_beli = $validated['harga_beli'];
         $harga_jual = $validated['harga_jual'];
         $stock = $validated['stock'];
-        
         DB::beginTransaction();
         try {
             if ($request->has('image_data')) {
@@ -74,14 +75,23 @@ class ProductController extends Controller
                 // Save to database if needed
                 $product = new Products();
                 $product->store_id = session('store_id');
-                $product->name = $request->name;
-                $product->varian = $request->varian;
-                $product->size = $request->size;
-                $product->unit = $request->unit;
-                $product->barcode = $request->barcode_text;
+                $product->name = $name;
+                $product->varian = $varian;
+                $product->size = $size;
+                $product->unit = $unit;
+                $product->barcode = $barcode_text;
+                $product->harga_beli = $harga_beli;
+                $product->harga_jual = $harga_jual;
                 $product->photo = 'uploads/products/' . $filename;
                 $product->save();
-                
+
+                $stocks = new Product_Stock();
+                $stocks->product_id = $product->id;
+                $stocks->stock = $stock;
+                $stocks->date = date('Y-m-d');
+                $stocks->save();
+
+                DB::commit();
 
                 return redirect()->back()->with('success', 'Product saved!');
             }
@@ -90,7 +100,7 @@ class ProductController extends Controller
             DB::rollBack();
 
             // Handle the error (e.g., log it or show a user-friendly message)
-            return redirect()->back()->with('error',   'There was an error creating the product.');
+            return redirect()->back()->with('error',   'Product failed to save');
         }
 
     }

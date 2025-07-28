@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\Store;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Store;
 use App\Models\UserHasRole;
+use App\Models\Role;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Rules\SafeInput;
+
 
 class StoreController extends Controller
 {
@@ -100,5 +104,93 @@ class StoreController extends Controller
         $store->delete();
 
         return redirect()->route('store.index')->with('success', 'Store deleted successfully!');
+    }
+    public function update_unique_code($id)
+    {        
+        DB::beginTransaction();
+        try {
+            do {
+                $uniqueCode = Str::upper(Str::random(8));
+            } while (Store::where('unique_code', $uniqueCode)->exists());
+
+            $store = Store::findOrFail($id);
+            $store->unique_code = $uniqueCode;
+            $store->save();
+
+            DB::commit();
+
+            return redirect()->route('store.index')->with('success', 'Unique code update successfully!');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to update store');
+        }
+    }
+    public function join()
+    {
+        return view('dashboard.join_store');
+    }
+    public function apply(Request $request)
+    {
+        $validated = $request->validate([
+            'unique_code' => ['required', 'string', new SafeInput],
+        ]);
+
+        $uniqueCode = $validated['unique_code'];
+        $store = Store::where('unique_code',$uniqueCode)->first();
+        DB::beginTransaction();
+        try {
+
+            $role = new UserHasRole();
+            $role->user_id = session('user_id');
+            $role->role_id = 3;
+            $role->store_id = $store->id;
+            $role->save();
+
+            DB::commit();
+            
+            session(['store_id' => $store->id]);
+
+            return redirect()->route('dashboard')->with('success', 'Join store successfully!');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to update store');
+        }
+    }
+    public function list_crew()
+    {
+        $user = UserHasRole::with('hasUser')
+                            ->with('hasRole')
+                            ->where('store_id',session('store_id'))
+                            ->where('user_id','!=',session('user_id'))
+                            ->get();
+        $roles = Role::where('id','!=',1)->get();
+
+        return view('dashboard.store.list_crew',compact('user','roles'));
+    }
+    public function update_role(Request $request)
+    {
+        $validated = $request->validate([
+            'id' => ['required', 'numeric','max:255', new SafeInput],
+            'user_id' => ['required', 'numeric','max:255', new SafeInput],
+            'role' => ['required', 'numeric','max:255', new SafeInput],
+        ]);
+        $id = $validated['id'];
+        $user_id = $validated['user_id'];
+        $role = $validated['role'];
+
+        DB::beginTransaction();
+        try {
+
+            $user_has_role = UserHasRole::findOrFail($id);
+            $user_has_role->role_id = $role;
+            $user_has_role->save();
+
+            DB::commit();
+
+            return redirect()->route('store.list_crew')->with('success', 'Role update successfully!');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to update store');
+        }
     }
 }
